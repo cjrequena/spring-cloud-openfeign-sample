@@ -1,0 +1,31 @@
+# Postgres
+spring.datasource.postgres.type: com.zaxxer.hikari.HikariDataSource
+spring.datasource.postgres.jdbcUrl: jdbc:postgresql://${POSTGRES_HOST:localhost}:15432/postgres
+spring.datasource.postgres.driver-class-name: org.postgresql.Driver
+spring.datasource.postgres.username: postgres
+spring.datasource.postgres.password: postgres
+
+# https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby
+spring.datasource.postgres.pool-name: HikariPool
+spring.datasource.postgres.connection-timeout: 20000
+spring.datasource.postgres.minimum-idle: 5
+spring.datasource.postgres.maximum-pool-size: 12
+spring.datasource.postgres.idle-timeout: 300000
+spring.datasource.postgres.max-lifetime: 1200000
+spring.datasource.postgres.auto-commit: false
+
+# JPA specific configs
+spring.jpa.open-in-view: false
+#spring.jpa.properties.hibernate.connection.provider_class: org.hibernate.hikaricp.internal.HikariCPConnectionProvider
+spring.jpa.database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQL95Dialect
+spring.jpa.properties.hibernate.show_sql: false
+spring.jpa.properties.hibernate.format_sql: true
+spring.jpa.properties.hibernate.use_sql: true
+spring.jpa.properties.hibernate.hibernate.dialect: true
+spring.jpa.properties.hibernate.id.new_generator_mappings: false
+spring.jpa.properties.hibernate.search.autoregister_listeners: false
+spring.jpa.properties.hibernate.bytecode.use_reflection_optimizer: false
+
+spring.flyway.enabled: true
+spring.flyway.locations: classpath:/db/migration
