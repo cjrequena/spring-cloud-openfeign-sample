@@ -15,6 +15,8 @@ services:
       - type: volume
         source: "postgres-001"
         target: "/data/postgres"
+      - $PWD/V1.0__account_db.sql:/docker-entrypoint-initdb.d/1-account_db.sql
+      - $PWD/V1.0__order_db.sql:/docker-entrypoint-initdb.d/1-order_db.sql
     networks:
       - "network-spring-cloud-openfeign-sample.local"
     restart: unless-stopped

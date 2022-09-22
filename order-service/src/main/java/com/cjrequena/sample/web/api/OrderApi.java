@@ -1,11 +1,11 @@
 package com.cjrequena.sample.web.api;
 
-import com.cjrequena.sample.dto.AccountDTO;
+import com.cjrequena.sample.dto.OrderDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
 import com.cjrequena.sample.exception.service.AccountNotFoundServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
-import com.cjrequena.sample.service.AccountService;
+import com.cjrequena.sample.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,25 +20,24 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 
 import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/account-api")
+@RequestMapping(value = "/order-api")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class AccountApi {
+public class OrderApi {
 
-  private final AccountService accountService;
+  private final OrderService orderService;
 
   @PostMapping(
-    path = "/accounts",
+    path = "/orders",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> create(@Valid @RequestBody AccountDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder) {
-    dto = accountService.create(dto);
+  public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder) {
+    dto = orderService.create(dto);
     URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
     HttpHeaders headers = new HttpHeaders();
     headers.set(CACHE_CONTROL, "no store, private, max-age=0");
@@ -47,14 +46,14 @@ public class AccountApi {
   }
 
   @GetMapping(
-    path = "/accounts/{id}",
+    path = "/orders/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<AccountDTO>> retrieveById(@PathVariable(value = "id") UUID id) throws NotFoundApiException {
+  public Mono<ResponseEntity<OrderDTO>> retrieveById(@PathVariable(value = "id") Integer id) throws NotFoundApiException {
     try {
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-      AccountDTO dto = this.accountService.retrieveById(id);
+      OrderDTO dto = this.orderService.retrieveById(id);
       return Mono.just(new ResponseEntity<>(dto, responseHeaders, HttpStatus.OK));
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
@@ -62,25 +61,25 @@ public class AccountApi {
   }
 
   @GetMapping(
-    path = "/accounts",
+    path = "/orders",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<List<AccountDTO>>> retrieve() {
+  public Mono<ResponseEntity<List<OrderDTO>>> retrieve() {
 
-    List<AccountDTO> dtoList = this.accountService.retrieve();
+    List<OrderDTO> dtoList = this.orderService.retrieve();
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
     return Mono.just(new ResponseEntity<>(dtoList, responseHeaders, HttpStatus.OK));
   }
 
   @PutMapping(
-    path = "/accounts/{id}",
+    path = "/orders/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> update(@PathVariable(value = "id") UUID id, @Valid @RequestBody AccountDTO dto) throws NotFoundApiException, BadRequestApiException {
+  public Mono<ResponseEntity<Void>> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody OrderDTO dto) throws NotFoundApiException, BadRequestApiException {
     try {
       dto.setId(id);
-      this.accountService.update(dto);
+      this.orderService.update(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
       return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
@@ -92,14 +91,14 @@ public class AccountApi {
   }
 
   @DeleteMapping(
-    path = "/accounts/{id}",
+    path = "/orders/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> delete(@PathVariable(value = "id") UUID id) throws NotFoundApiException {
+  public Mono<ResponseEntity<Void>> delete(@PathVariable(value = "id") Integer id) throws NotFoundApiException {
     try {
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-      this.accountService.delete(id);
+      this.orderService.delete(id);
       return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());

@@ -10,6 +10,7 @@ import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceExcept
 import com.cjrequena.sample.mapper.AccountMapper;
 import jakarta.json.JsonMergePatch;
 import jakarta.json.JsonPatch;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,20 +31,12 @@ import java.util.stream.Collectors;
  */
 @Log4j2
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountService {
 
-  private AccountMapper accountMapper;
-  private AccountRepository accountRepository;
+  private final  AccountMapper accountMapper;
+  private final AccountRepository accountRepository;
 
-  /**
-   *
-   * @param accountRepository
-   */
-  @Autowired
-  public AccountService(AccountRepository accountRepository, AccountMapper accountMapper) {
-    this.accountRepository = accountRepository;
-    this.accountMapper = accountMapper;
-  }
 
   @Transactional
   public AccountDTO create(AccountDTO dto) {

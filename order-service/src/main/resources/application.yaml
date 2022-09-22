@@ -1,3 +1,9 @@
+server.servlet.context-path: / # Context path of the application.
+server.port: 9080 # Server HTTP port.
+spring.config.activate.on-profile: default
+spring.main.allow-bean-definition-overriding: true # Enable bean override
+
+
 # Postgres
 spring.datasource.postgres.type: com.zaxxer.hikari.HikariDataSource
 spring.datasource.postgres.jdbcUrl: jdbc:postgresql://${POSTGRES_HOST:localhost}:15432/postgres

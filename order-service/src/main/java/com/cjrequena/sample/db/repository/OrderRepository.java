@@ -1,6 +1,6 @@
 package com.cjrequena.sample.db.repository;
 
-import com.cjrequena.sample.db.entity.AccountEntity;
+import com.cjrequena.sample.db.entity.OrderEntity;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  *
@@ -20,31 +19,32 @@ import java.util.UUID;
  */
 @Repository
 @Transactional(readOnly = true)
-public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
+public interface OrderRepository extends CrudRepository<OrderEntity, Integer> {
 
   @Override
   @Transactional(readOnly = true)
-  Optional<AccountEntity> findById(UUID id);
+  Optional<OrderEntity> findById(Integer id);
 
   @Override
   @Transactional(readOnly = true)
-  List<AccountEntity> findAll();
+  List<OrderEntity> findAll();
 
   @Modifying
   @Transactional
-  @Query(value = "INSERT INTO T_ACCOUNT "
-    + " (ID, OWNER, BALANCE, VERSION) "
-    + " VALUES (:#{#entity.id}, :#{#entity.owner}, :#{#entity.balance}, 1)"
+  @Query(value = "INSERT INTO T_ORDER "
+    + " (ACCOUNT_ID, STATUS, TOTAL, VERSION) "
+    + " VALUES (:#{#entity.accountId}, :#{#entity.status},:#{#entity.total}, 1)"
     , nativeQuery = true)
-  void create(@Param("entity") AccountEntity entity);
+  void create(@Param("entity") OrderEntity entity);
 
   @Modifying
   @Transactional
-  @Query(value = "UPDATE T_ACCOUNT "
-    + " SET OWNER = :#{#entity.owner}, "
-    + " BALANCE = :#{#entity.balance}, "
+  @Query(value = "UPDATE T_ORDER "
+    + " SET ACCOUNT_ID = :#{#entity.accountId}, "
+    + " STATUS = :#{#entity.status}, "
+    + " TOTAL = :#{#entity.total}, "
     + " VERSION= VERSION + 1"
     + " WHERE ID = :#{#entity.id} AND VERSION = :#{#entity.version}",
     nativeQuery = true)
-  void update(@Param("entity") AccountEntity entity);
+  void update(@Param("entity") OrderEntity entity);
 }

@@ -10,27 +10,25 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- *
- * <p></p>
- * <p></p>
- * @author cjrequena
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "t_account")
-public class AccountEntity {
+@Table(name = "t_order")
+public class OrderEntity {
+
   @Id
   @Column(name = "id")
-  private UUID id;
+  Integer id;
 
-  @Column(name = "owner")
-  private String owner;
+  @Column(name = "account_id")
+  UUID accountId;
 
-  @Column(name = "balance")
-  private BigDecimal balance;
+  @Column(name = "status")
+  Boolean status;
+
+  @Column(name = "total")
+  BigDecimal total;
 
   @Column(name = "creation_date", nullable = false, updatable = false, insertable = false)
   @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
