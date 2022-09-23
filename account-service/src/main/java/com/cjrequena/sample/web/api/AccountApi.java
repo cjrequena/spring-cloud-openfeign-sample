@@ -1,5 +1,6 @@
 package com.cjrequena.sample.web.api;
 
+import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.AccountDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
@@ -22,14 +23,18 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import static com.cjrequena.sample.web.api.AccountApi.ACCEPT_VERSION;
 import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/account-api")
+@RequestMapping(value = AccountApi.ENDPOINT, headers = {ACCEPT_VERSION})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountApi {
+
+  public static final String ENDPOINT = "/account-service/api/";
+  public static final String ACCEPT_VERSION = "Accept-Version=" + Constants.VND_SAMPLE_SERVICE_V1;
 
   private final AccountService accountService;
 
@@ -77,16 +82,17 @@ public class AccountApi {
     path = "/accounts/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> update(@PathVariable(value = "id") UUID id, @Valid @RequestBody AccountDTO dto) throws NotFoundApiException, BadRequestApiException {
+  public Mono<ResponseEntity<Void>> update(@PathVariable(value = "id") UUID id, @Valid @RequestBody AccountDTO dto, @RequestHeader("version") Long version) throws NotFoundApiException, BadRequestApiException {
     try {
       dto.setId(id);
+      dto.setVersion(version);
       this.accountService.update(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
       return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
-    } catch (OptimisticConcurrencyServiceException ex){
+    } catch (OptimisticConcurrencyServiceException ex) {
       throw new BadRequestApiException(ex.getMessage());
     }
   }

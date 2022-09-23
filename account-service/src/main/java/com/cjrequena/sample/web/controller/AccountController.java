@@ -1,5 +1,6 @@
 package com.cjrequena.sample.web.controller;
 
+import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.DepositAccountDTO;
 import com.cjrequena.sample.dto.WithdrawAccountDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
@@ -20,6 +21,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import static com.cjrequena.sample.web.controller.AccountController.ACCEPT_VERSION;
+import static com.cjrequena.sample.web.controller.AccountController.ENDPOINT;
 import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -33,9 +36,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/account-api")
+@RequestMapping(value = ENDPOINT, headers = {ACCEPT_VERSION})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountController {
+
+  public static final String ENDPOINT = "/account-service/api/";
+  public static final String ACCEPT_VERSION = "Accept-Version=" + Constants.VND_SAMPLE_SERVICE_V1;
 
   private final AccountService accountService;
 
