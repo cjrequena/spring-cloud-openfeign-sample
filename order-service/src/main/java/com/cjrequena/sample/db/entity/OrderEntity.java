@@ -25,7 +25,7 @@ public class OrderEntity {
   UUID accountId;
 
   @Column(name = "status")
-  Boolean status;
+  String status;
 
   @Column(name = "total")
   BigDecimal total;

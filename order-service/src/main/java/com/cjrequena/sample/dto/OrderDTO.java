@@ -1,5 +1,6 @@
 package com.cjrequena.sample.dto;
 
+import com.cjrequena.sample.common.EStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -31,19 +32,19 @@ public class OrderDTO {
 
   @JsonProperty(value = "id")
   @Schema(accessMode = READ_ONLY)
-  Integer id;
+  private Integer id;
 
   @NotNull(message = "account_id is a required field")
   @JsonProperty(value = "account_id", required = true)
-  UUID accountId;
+  private UUID accountId;
 
-  @JsonProperty(value = "status" )
+  @JsonProperty(value = "status")
   @Schema(accessMode = READ_ONLY)
-  Boolean status;
+  private EStatus status = EStatus.PENDING; // Default value
 
   @NotNull(message = "total is a required field")
   @JsonProperty(value = "total", required = true)
-  BigDecimal total;
+  private BigDecimal total;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @JsonProperty(value = "creation_date")
