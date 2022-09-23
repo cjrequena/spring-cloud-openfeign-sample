@@ -20,7 +20,7 @@ import java.util.UUID;
 })
 @Schema
 @Data
-public class DepositAccountDTO {
+public class WithdrawAccountDTO {
 
   @JsonProperty(value = "account_id")
   private UUID accountId;

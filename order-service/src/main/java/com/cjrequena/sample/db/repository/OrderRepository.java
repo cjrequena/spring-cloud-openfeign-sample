@@ -18,7 +18,7 @@ import java.util.Optional;
  * @author cjrequena
  */
 @Repository
-@Transactional(readOnly = true)
+@Transactional
 public interface OrderRepository extends CrudRepository<OrderEntity, Integer> {
 
   @Override

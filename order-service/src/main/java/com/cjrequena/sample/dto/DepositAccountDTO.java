@@ -15,7 +15,7 @@ import java.util.UUID;
  * @author cjrequena
  */
 @JsonPropertyOrder(value = {
-  "accountId",
+  "account_id",
   "amount"
 })
 @Schema

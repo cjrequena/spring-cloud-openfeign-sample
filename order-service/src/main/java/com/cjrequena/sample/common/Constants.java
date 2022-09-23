@@ -10,6 +10,6 @@ package com.cjrequena.sample.common;
  */
 public class Constants {
   /** */
-  public static final String VND_SAMPLE_SERVICE_V1 = "vnd.sample-service.v1";
+  public static final String VND_SAMPLE_SERVICE_V1 = "application/vnd.sample-service.v1";
 
 }

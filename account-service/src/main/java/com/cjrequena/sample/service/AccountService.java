@@ -7,6 +7,7 @@ import com.cjrequena.sample.dto.DepositAccountDTO;
 import com.cjrequena.sample.dto.WithdrawAccountDTO;
 import com.cjrequena.sample.exception.service.AccountNotFoundServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
+import com.cjrequena.sample.exception.service.ServiceException;
 import com.cjrequena.sample.mapper.AccountMapper;
 import jakarta.json.JsonMergePatch;
 import jakarta.json.JsonPatch;
@@ -34,11 +35,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountService {
 
-  private final  AccountMapper accountMapper;
+  private final AccountMapper accountMapper;
   private final AccountRepository accountRepository;
 
-
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
   public AccountDTO create(AccountDTO dto) {
     dto.setId(UUID.randomUUID());
     AccountEntity entity = this.accountMapper.toEntity(dto);
@@ -47,7 +47,7 @@ public class AccountService {
     return dto;
   }
 
-  @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+  @Transactional(readOnly = true)
   public AccountDTO retrieveById(UUID id) throws AccountNotFoundServiceException {
     Optional<AccountEntity> optional = this.accountRepository.findById(id);
     if (!optional.isPresent()) {
@@ -56,7 +56,7 @@ public class AccountService {
     return accountMapper.toDTO(optional.get());
   }
 
-  @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+  @Transactional(readOnly = true)
   public List<AccountDTO> retrieve() {
     List<AccountEntity> entities = this.accountRepository.findAll();
     List<AccountDTO> dtoList = entities.stream().map(
@@ -65,81 +65,52 @@ public class AccountService {
     return dtoList;
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
   public AccountDTO update(AccountDTO dto) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
-    Optional<AccountEntity> optional = accountRepository.findById(dto.getId());
-    if (optional.isPresent()) {
-      AccountEntity entity = optional.get();
-      if (entity.getVersion().equals(dto.getVersion())) {
-        entity = this.accountMapper.toEntity(dto);
-        accountRepository.update(entity);
-        log.debug("Updated account with id {}", entity.getId());
-        return this.accountMapper.toDTO(entity);
-      } else {
-        log.trace(
-          "Optimistic concurrency control error in account {}: actual version doesn't match expected version {}",
-          entity.getId(),
-          entity.getVersion());
-        throw new OptimisticConcurrencyServiceException(
-          "Optimistic concurrency control error in account :: " + entity.getId() + " :: actual version doesn't match expected version :: " + entity.getVersion());
-      }
+    AccountDTO currentStateAccountDTO = this.retrieveById(dto.getId());
+    if (currentStateAccountDTO.getVersion().equals(dto.getVersion())) {
+      AccountEntity entity = this.accountMapper.toEntity(dto);
+      this.accountRepository.update(entity);
+      log.debug("Updated account with id {}", entity.getId());
+      return this.accountMapper.toDTO(entity);
     } else {
-      throw new AccountNotFoundServiceException("The account " + dto.getId() + " was not Found");
+      log.trace(
+        "Optimistic concurrency control error in account :: {} :: actual version doesn't match expected version {}",
+        currentStateAccountDTO.getId(),
+        currentStateAccountDTO.getVersion());
+      throw new OptimisticConcurrencyServiceException(
+        "Optimistic concurrency control error in account :: " + currentStateAccountDTO.getId() + " :: actual version doesn't match expected version "
+          + currentStateAccountDTO.getVersion());
     }
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
   public AccountDTO patch(UUID id, JsonPatch patchDocument) {
     return null;
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
   public AccountDTO patch(UUID id, JsonMergePatch mergePatchDocument) {
     return null;
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
   public void delete(UUID id) throws AccountNotFoundServiceException {
-    Optional<AccountEntity> optional = accountRepository.findById(id);
-    optional.ifPresent(
-      entity -> {
-        accountRepository.delete(entity);
-        log.debug("Deleted User: {}", entity);
-      }
-    );
-    optional.orElseThrow(() -> new AccountNotFoundServiceException("Not Found"));
+    AccountDTO dto = this.retrieveById(id);
+    this.accountRepository.delete(accountMapper.toEntity(dto));
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
   public void deposit(DepositAccountDTO depositAccountDTO) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
     AccountDTO dto = this.retrieveById(depositAccountDTO.getAccountId());
-    if(dto.getVersion().equals(depositAccountDTO.getVersion())){
-      dto.setBalance(dto.getBalance().add(depositAccountDTO.getAmount()));
-      this.update(dto);
-    }else{
-      log.trace(
-        "Optimistic concurrency control error in account {}: actual version doesn't match expected version {}",
-        dto.getId(),
-        dto.getVersion());
-      throw new OptimisticConcurrencyServiceException(
-        "Optimistic concurrency control error in account :: " + dto.getId() + " :: actual version doesn't match expected version :: " + dto.getVersion());
-    }
+    dto.setBalance(dto.getBalance().add(depositAccountDTO.getAmount()));
+    this.update(dto);
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
   public void withdraw(WithdrawAccountDTO withdrawAccountDTO) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
     AccountDTO dto = this.retrieveById(withdrawAccountDTO.getAccountId());
-    if(dto.getVersion().equals(withdrawAccountDTO.getVersion())){
-      dto.setBalance(dto.getBalance().subtract(withdrawAccountDTO.getAmount()));
-      this.update(dto);
-    }else{
-      log.trace(
-        "Optimistic concurrency control error in account {}: actual version doesn't match expected version {}",
-        dto.getId(),
-        dto.getVersion());
-      throw new OptimisticConcurrencyServiceException(
-        "Optimistic concurrency control error in account :: " + dto.getId() + " :: actual version doesn't match expected version :: " + dto.getVersion());
-
-    }
+    dto.setBalance(dto.getBalance().subtract(withdrawAccountDTO.getAmount()));
+    this.update(dto);
   }
 }

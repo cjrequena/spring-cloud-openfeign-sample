@@ -1,9 +1,11 @@
 package com.cjrequena.sample.web.api;
 
+import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.OrderDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
 import com.cjrequena.sample.exception.service.AccountNotFoundServiceException;
+import com.cjrequena.sample.exception.service.FeignServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
 import com.cjrequena.sample.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -26,23 +28,29 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/order-api")
+@RequestMapping(value = OrderApi.ENDPOINT, headers = {OrderApi.ACCEPT_VERSION})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderApi {
 
+  public static final String ENDPOINT = "/order-service/api/";
+  public static final String ACCEPT_VERSION = "Accept-Version=" + Constants.VND_SAMPLE_SERVICE_V1;
   private final OrderService orderService;
 
   @PostMapping(
     path = "/orders",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder) {
-    dto = orderService.create(dto);
-    URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
-    HttpHeaders headers = new HttpHeaders();
-    headers.set(CACHE_CONTROL, "no store, private, max-age=0");
-    headers.setLocation(resourcePath);
-    return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
+  public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder) throws BadRequestApiException {
+    try {
+      dto = orderService.create(dto);
+      URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
+      HttpHeaders headers = new HttpHeaders();
+      headers.set(CACHE_CONTROL, "no store, private, max-age=0");
+      headers.setLocation(resourcePath);
+      return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
+    } catch (FeignServiceException ex) {
+      throw new BadRequestApiException(ex.getMessage());
+    }
   }
 
   @GetMapping(
@@ -85,7 +93,7 @@ public class OrderApi {
       return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
-    } catch (OptimisticConcurrencyServiceException ex){
+    } catch (OptimisticConcurrencyServiceException ex) {
       throw new BadRequestApiException(ex.getMessage());
     }
   }

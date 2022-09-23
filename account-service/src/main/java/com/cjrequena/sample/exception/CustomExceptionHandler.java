@@ -28,13 +28,29 @@ public class CustomExceptionHandler {
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
   private static final String EXCEPTION_LOG = "Exception {}";
 
+  @ExceptionHandler({Exception.class})
+  @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+  public ResponseEntity<Object> unhandledExceptions(Exception ex) {
+    log.error(EXCEPTION_LOG, ex.getMessage(), ex);
+    ErrorDTO errorDTO = new ErrorDTO();
+    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+    errorDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    errorDTO.setErrorCode(ex.getClass().getSimpleName());
+    errorDTO.setMessage(ex.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
+  }
+
   @ExceptionHandler({ConstraintViolationException.class})
   @ResponseStatus(value = HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ResponseEntity<Object> handleConstrainViolationException(ConstraintViolationException ex) {
     log.debug(EXCEPTION_LOG, ex.getMessage(), ex);
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-      .body(new ErrorDTO(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)), ex.getClass().getSimpleName(), ex.getMessage()));
+    ErrorDTO errorDTO = new ErrorDTO();
+    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+    errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
+    errorDTO.setErrorCode(ex.getClass().getSimpleName());
+    errorDTO.setMessage(ex.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
   }
 
   @ExceptionHandler({ServerWebInputException.class})
@@ -42,35 +58,37 @@ public class CustomExceptionHandler {
   @ResponseBody
   public ResponseEntity<Object> handleServerWebInputException(ServerWebInputException ex) {
     log.debug(EXCEPTION_LOG, ex.getMessage(), ex);
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-      .body(new ErrorDTO(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)), ex.getClass().getSimpleName(), ex.getMessage()));
+    ErrorDTO errorDTO = new ErrorDTO();
+    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+    errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
+    errorDTO.setErrorCode(ex.getClass().getSimpleName());
+    errorDTO.setMessage(ex.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
   }
 
   @ExceptionHandler({ServiceException.class})
   @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
   public ResponseEntity<Object> handleServiceException(ServiceException ex) {
     log.error(EXCEPTION_LOG, ex.getMessage(), ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .body(new ErrorDTO(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)), ex.getClass().getSimpleName(), ex.getMessage()));
+    ErrorDTO errorDTO = new ErrorDTO();
+    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+    errorDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    errorDTO.setErrorCode(ex.getClass().getSimpleName());
+    errorDTO.setMessage(ex.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
   }
 
   @ExceptionHandler({ApiException.class})
   @ResponseBody
   public ResponseEntity<Object> handleApiException(ApiException ex) {
-    if (ex.getHttpStatus().is5xxServerError()) {
-      log.error(EXCEPTION_LOG, ex.getMessage(), ex);
-    } else {
-      log.debug(EXCEPTION_LOG, ex.getMessage(), ex);
-    }
-    return ResponseEntity.status(ex.getHttpStatus())
-      .body(new ErrorDTO(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)), ex.getClass().getSimpleName(), ex.getMessage()));
+    log.error(EXCEPTION_LOG, ex.getMessage(), ex);
+    ErrorDTO errorDTO = new ErrorDTO();
+    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+    errorDTO.setStatus(ex.getHttpStatus().value());
+    errorDTO.setErrorCode(ex.getClass().getSimpleName());
+    errorDTO.setMessage(ex.getMessage());
+    return ResponseEntity.status(ex.getHttpStatus()).body(errorDTO);
   }
 
-  @ExceptionHandler({Exception.class})
-  @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-  public ResponseEntity<Object> unhandledExceptions(Exception ex) {
-    log.error(EXCEPTION_LOG, ex.getMessage(), ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .body(new ErrorDTO(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)), ex.getClass().getSimpleName(), ex.getMessage()));
-  }
 }

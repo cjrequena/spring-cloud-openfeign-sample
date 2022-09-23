@@ -1,6 +1,5 @@
 package com.cjrequena.sample.exception.api;
 
-import com.cjrequena.sample.web.controller.ControllerException;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -9,7 +8,7 @@ import org.springframework.http.HttpStatus;
  * <p></p>
  * @author cjrequena
  */
-public class BadRequestApiException extends ControllerException {
+public class BadRequestApiException extends ApiException {
   public BadRequestApiException() {
     super(HttpStatus.BAD_REQUEST);
   }

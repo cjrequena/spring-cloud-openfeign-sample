@@ -71,7 +71,6 @@ public class AccountApi {
     produces = {APPLICATION_JSON_VALUE}
   )
   public Mono<ResponseEntity<List<AccountDTO>>> retrieve() {
-
     List<AccountDTO> dtoList = this.accountService.retrieve();
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");

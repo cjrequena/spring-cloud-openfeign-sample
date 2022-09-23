@@ -18,7 +18,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import static com.cjrequena.sample.web.controller.AccountController.ACCEPT_VERSION;
@@ -46,10 +49,9 @@ public class AccountController {
   private final AccountService accountService;
 
   @PostMapping(path = "/accounts/deposit", produces = {APPLICATION_JSON_VALUE})
-  public Mono<ResponseEntity<Void>> deposit(@RequestBody DepositAccountDTO dto, @RequestHeader("version") Long version, ServerHttpRequest request)
+  public Mono<ResponseEntity<Void>> deposit(@RequestBody DepositAccountDTO dto, ServerHttpRequest request)
     throws NotFoundControllerException, BadRequestControllerException, ConflictControllerException, NotFoundApiException, BadRequestApiException {
     try {
-      dto.setVersion(version);
       this.accountService.deposit(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
@@ -62,10 +64,9 @@ public class AccountController {
   }
 
   @PostMapping(path = "/accounts/withdraw", produces = {APPLICATION_JSON_VALUE})
-  public Mono<ResponseEntity<Void>> withdraw(@RequestBody WithdrawAccountDTO dto, @RequestHeader("version") Long version, ServerHttpRequest request)
+  public Mono<ResponseEntity<Void>> withdraw(@RequestBody WithdrawAccountDTO dto, ServerHttpRequest request)
     throws NotFoundControllerException, BadRequestControllerException, ConflictControllerException, NotFoundApiException, BadRequestApiException {
     try {
-      dto.setVersion(version);
       this.accountService.withdraw(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
