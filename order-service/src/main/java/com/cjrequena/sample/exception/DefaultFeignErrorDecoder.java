@@ -54,7 +54,7 @@ public class DefaultFeignErrorDecoder implements ErrorDecoder {
           case 409: // HttpStatus.CONFLICT.value()
           case 400: // HttpStatus.BAD_REQUEST.value()
           default:
-            return new FeignServiceException(errorDTO.toString());
+            return new FeignServiceException(errorDTO);
         }
       }
     } catch (IOException e) { //NOSONAR

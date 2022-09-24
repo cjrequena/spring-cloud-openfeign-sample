@@ -49,6 +49,7 @@ public class OrderApi {
       headers.setLocation(resourcePath);
       return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
     } catch (FeignServiceException ex) {
+      log.error("{}", ex.getErrorDTO());
       throw new BadRequestApiException(ex.getMessage());
     }
   }
