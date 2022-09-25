@@ -32,19 +32,18 @@ import java.util.stream.Collectors;
  */
 @Log4j2
 @Service
+@Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountService {
 
   private final AccountMapper accountMapper;
   private final AccountRepository accountRepository;
 
-  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
-  public AccountDTO create(AccountDTO dto) {
+
+  public void create(AccountDTO dto) {
     dto.setId(UUID.randomUUID());
     AccountEntity entity = this.accountMapper.toEntity(dto);
     this.accountRepository.create(entity);
-    dto = this.accountMapper.toDTO(entity);
-    return dto;
   }
 
   @Transactional(readOnly = true)
@@ -65,49 +64,50 @@ public class AccountService {
     return dtoList;
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
-  public AccountDTO update(AccountDTO dto) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
-    AccountDTO currentStateAccountDTO = this.retrieveById(dto.getId());
-    if (currentStateAccountDTO.getVersion().equals(dto.getVersion())) {
+  public void update(AccountDTO dto) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
+    AccountDTO _dto = this.retrieveById(dto.getId());
+    if (_dto.getVersion().equals(dto.getVersion())) {
       AccountEntity entity = this.accountMapper.toEntity(dto);
       this.accountRepository.update(entity);
       log.debug("Updated account with id {}", entity.getId());
-      return this.accountMapper.toDTO(entity);
     } else {
       log.trace(
         "Optimistic concurrency control error in account :: {} :: actual version doesn't match expected version {}",
-        currentStateAccountDTO.getId(),
-        currentStateAccountDTO.getVersion());
+        _dto.getId(),
+        _dto.getVersion());
       throw new OptimisticConcurrencyServiceException(
-        "Optimistic concurrency control error in account :: " + currentStateAccountDTO.getId() + " :: actual version doesn't match expected version "
-          + currentStateAccountDTO.getVersion());
+        "Optimistic concurrency control error in account :: " + _dto.getId() + " :: actual version doesn't match expected version "
+          + _dto.getVersion());
     }
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+
   public AccountDTO patch(UUID id, JsonPatch patchDocument) {
     return null;
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+
   public AccountDTO patch(UUID id, JsonMergePatch mergePatchDocument) {
     return null;
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+
   public void delete(UUID id) throws AccountNotFoundServiceException {
-    AccountDTO dto = this.retrieveById(id);
-    this.accountRepository.delete(accountMapper.toEntity(dto));
+    Optional<AccountEntity> optional = this.accountRepository.findById(id);
+    if (!optional.isPresent()) {
+      throw new AccountNotFoundServiceException("The account :: " + id + " :: was not Found");
+    }
+    this.accountRepository.deleteById(id);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+
   public void deposit(DepositAccountDTO depositAccountDTO) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
     AccountDTO dto = this.retrieveById(depositAccountDTO.getAccountId());
     dto.setBalance(dto.getBalance().add(depositAccountDTO.getAmount()));
     this.update(dto);
   }
 
-  @Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
+
   public void withdraw(WithdrawAccountDTO withdrawAccountDTO) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
     AccountDTO dto = this.retrieveById(withdrawAccountDTO.getAccountId());
     dto.setBalance(dto.getBalance().subtract(withdrawAccountDTO.getAmount()));

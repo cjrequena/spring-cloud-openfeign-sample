@@ -43,7 +43,7 @@ public class AccountApi {
     produces = {APPLICATION_JSON_VALUE}
   )
   public Mono<ResponseEntity<Void>> create(@Valid @RequestBody AccountDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder) {
-    dto = accountService.create(dto);
+    accountService.create(dto);
     URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
     HttpHeaders headers = new HttpHeaders();
     headers.set(CACHE_CONTROL, "no store, private, max-age=0");
@@ -57,10 +57,10 @@ public class AccountApi {
   )
   public Mono<ResponseEntity<AccountDTO>> retrieveById(@PathVariable(value = "id") UUID id) throws NotFoundApiException {
     try {
-      HttpHeaders responseHeaders = new HttpHeaders();
-      responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
+      HttpHeaders headers = new HttpHeaders();
+      headers.set(CACHE_CONTROL, "no store, private, max-age=0");
       AccountDTO dto = this.accountService.retrieveById(id);
-      return Mono.just(new ResponseEntity<>(dto, responseHeaders, HttpStatus.OK));
+      return Mono.just(new ResponseEntity<>(dto, headers, HttpStatus.OK));
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     }
@@ -72,9 +72,9 @@ public class AccountApi {
   )
   public Mono<ResponseEntity<List<AccountDTO>>> retrieve() {
     List<AccountDTO> dtoList = this.accountService.retrieve();
-    HttpHeaders responseHeaders = new HttpHeaders();
-    responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-    return Mono.just(new ResponseEntity<>(dtoList, responseHeaders, HttpStatus.OK));
+    HttpHeaders headers = new HttpHeaders();
+    headers.set(CACHE_CONTROL, "no store, private, max-age=0");
+    return Mono.just(new ResponseEntity<>(dtoList, headers, HttpStatus.OK));
   }
 
   @PutMapping(
@@ -86,9 +86,9 @@ public class AccountApi {
       dto.setId(id);
       dto.setVersion(version);
       this.accountService.update(dto);
-      HttpHeaders responseHeaders = new HttpHeaders();
-      responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-      return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
+      HttpHeaders headers = new HttpHeaders();
+      headers.set(CACHE_CONTROL, "no store, private, max-age=0");
+      return Mono.just(new ResponseEntity<>(headers, HttpStatus.NO_CONTENT));
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     } catch (OptimisticConcurrencyServiceException ex) {

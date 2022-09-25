@@ -19,7 +19,7 @@ import java.util.UUID;
  * @author cjrequena
  */
 @Repository
-@Transactional(readOnly = true)
+@Transactional
 public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
 
   @Override
@@ -31,7 +31,6 @@ public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
   List<AccountEntity> findAll();
 
   @Modifying
-  @Transactional
   @Query(value = "INSERT INTO T_ACCOUNT "
     + " (ID, OWNER, BALANCE, VERSION) "
     + " VALUES (:#{#entity.id}, :#{#entity.owner}, :#{#entity.balance}, 1)"
@@ -39,7 +38,6 @@ public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
   void create(@Param("entity") AccountEntity entity);
 
   @Modifying
-  @Transactional
   @Query(value = "UPDATE T_ACCOUNT "
     + " SET OWNER = :#{#entity.owner}, "
     + " BALANCE = :#{#entity.balance}, "
