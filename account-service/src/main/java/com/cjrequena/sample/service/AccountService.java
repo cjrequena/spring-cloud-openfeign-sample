@@ -39,7 +39,6 @@ public class AccountService {
   private final AccountMapper accountMapper;
   private final AccountRepository accountRepository;
 
-
   public void create(AccountDTO dto) {
     dto.setId(UUID.randomUUID());
     AccountEntity entity = this.accountMapper.toEntity(dto);
@@ -49,7 +48,7 @@ public class AccountService {
   @Transactional(readOnly = true)
   public AccountDTO retrieveById(UUID id) throws AccountNotFoundServiceException {
     Optional<AccountEntity> optional = this.accountRepository.findById(id);
-    if (!optional.isPresent()) {
+    if (optional.isEmpty()) {
       throw new AccountNotFoundServiceException("The account :: " + id + " :: was not Found");
     }
     return accountMapper.toDTO(optional.get());
@@ -57,11 +56,7 @@ public class AccountService {
 
   @Transactional(readOnly = true)
   public List<AccountDTO> retrieve() {
-    List<AccountEntity> entities = this.accountRepository.findAll();
-    List<AccountDTO> dtoList = entities.stream().map(
-      (entity) -> this.accountMapper.toDTO(entity)
-    ).collect(Collectors.toList());
-    return dtoList;
+    return this.accountRepository.findAll().stream().map(this.accountMapper::toDTO).collect(Collectors.toList());
   }
 
   public void update(AccountDTO dto) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
@@ -81,32 +76,27 @@ public class AccountService {
     }
   }
 
-
   public AccountDTO patch(UUID id, JsonPatch patchDocument) {
     return null;
   }
-
 
   public AccountDTO patch(UUID id, JsonMergePatch mergePatchDocument) {
     return null;
   }
 
-
   public void delete(UUID id) throws AccountNotFoundServiceException {
     Optional<AccountEntity> optional = this.accountRepository.findById(id);
-    if (!optional.isPresent()) {
+    if (optional.isEmpty()) {
       throw new AccountNotFoundServiceException("The account :: " + id + " :: was not Found");
     }
     this.accountRepository.deleteById(id);
   }
-
 
   public void deposit(DepositAccountDTO depositAccountDTO) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
     AccountDTO dto = this.retrieveById(depositAccountDTO.getAccountId());
     dto.setBalance(dto.getBalance().add(depositAccountDTO.getAmount()));
     this.update(dto);
   }
-
 
   public void withdraw(WithdrawAccountDTO withdrawAccountDTO) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
     AccountDTO dto = this.retrieveById(withdrawAccountDTO.getAccountId());
