@@ -1,6 +1,6 @@
+spring.config.activate.on-profile: default
 server.servlet.context-path: / # Context path of the application.
 server.port: 8080 # Server HTTP port.
-spring.config.activate.on-profile: default
 spring.main.allow-bean-definition-overriding: true # Enable bean override
 
 # Postgres

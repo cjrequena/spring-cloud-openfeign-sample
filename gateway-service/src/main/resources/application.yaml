@@ -1,0 +1,4 @@
+spring.config.activate.on-profile: default
+server.servlet.context-path: / # Context path of the application.
+server.port: 1080 # Server HTTP port.
+spring.main.allow-bean-definition-overriding: true # Enable bean override
