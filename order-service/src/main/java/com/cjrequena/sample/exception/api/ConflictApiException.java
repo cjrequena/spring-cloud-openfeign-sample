@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
  */
 public class ConflictApiException extends ApiException {
   public ConflictApiException() {
-    super(HttpStatus.CONFLICT, HttpStatus.CONFLICT.getReasonPhrase());
+    super(HttpStatus.CONFLICT);
   }
 
   public ConflictApiException(String message) {

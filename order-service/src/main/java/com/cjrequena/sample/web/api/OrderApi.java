@@ -3,9 +3,12 @@ package com.cjrequena.sample.web.api;
 import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.OrderDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
+import com.cjrequena.sample.exception.api.ConflictApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
-import com.cjrequena.sample.exception.service.AccountNotFoundServiceException;
+import com.cjrequena.sample.exception.service.FeignServiceException;
+import com.cjrequena.sample.exception.service.InsufficientBalanceServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
+import com.cjrequena.sample.exception.service.OrderNotFoundServiceException;
 import com.cjrequena.sample.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,13 +42,18 @@ public class OrderApi {
     path = "/orders",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder) throws BadRequestApiException {
-    this.orderService.create(dto);
-    URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
-    HttpHeaders headers = new HttpHeaders();
-    headers.set(CACHE_CONTROL, "no store, private, max-age=0");
-    headers.setLocation(resourcePath);
-    return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
+  public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder)
+    throws BadRequestApiException, ConflictApiException {
+    try {
+      this.orderService.create(dto);
+      URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
+      HttpHeaders headers = new HttpHeaders();
+      headers.set(CACHE_CONTROL, "no store, private, max-age=0");
+      headers.setLocation(resourcePath);
+      return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
+    } catch (FeignServiceException | InsufficientBalanceServiceException ex) {
+      throw new ConflictApiException(ex.getMessage());
+    }
   }
 
   @GetMapping(
@@ -58,7 +66,7 @@ public class OrderApi {
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
       OrderDTO dto = this.orderService.retrieveById(id);
       return Mono.just(new ResponseEntity<>(dto, responseHeaders, HttpStatus.OK));
-    } catch (AccountNotFoundServiceException ex) {
+    } catch (OrderNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     }
   }
@@ -86,7 +94,7 @@ public class OrderApi {
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
       return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
-    } catch (AccountNotFoundServiceException ex) {
+    } catch (OrderNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     } catch (OptimisticConcurrencyServiceException ex) {
       throw new BadRequestApiException(ex.getMessage());
@@ -103,7 +111,7 @@ public class OrderApi {
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
       this.orderService.delete(id);
       return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
-    } catch (AccountNotFoundServiceException ex) {
+    } catch (OrderNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     }
   }

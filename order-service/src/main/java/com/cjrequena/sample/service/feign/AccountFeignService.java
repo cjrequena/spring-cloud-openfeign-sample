@@ -1,6 +1,7 @@
 package com.cjrequena.sample.service.feign;
 
 import com.cjrequena.sample.common.Constants;
+import com.cjrequena.sample.dto.AccountDTO;
 import com.cjrequena.sample.dto.DepositAccountDTO;
 import com.cjrequena.sample.dto.WithdrawAccountDTO;
 import com.cjrequena.sample.exception.service.FeignServiceException;
@@ -8,9 +9,13 @@ import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 /**
  * <p>
@@ -24,6 +29,13 @@ import reactor.core.publisher.Mono;
 @FeignClient(name = "account-service", url = "${account-service.url}", contextId = "account-service", path = "/account-service/api")
 @Headers("Accept-Version: " + Constants.VND_SAMPLE_SERVICE_V1)
 public interface AccountFeignService {
+
+  @GetMapping(
+    value = "/accounts/{id}",
+    consumes = {MediaType.APPLICATION_JSON_VALUE},
+    headers = {"Accept-Version=" + Constants.VND_SAMPLE_SERVICE_V1}
+  )
+  AccountDTO retrieve(@PathVariable(value = "id") UUID id) throws FeignServiceException;
 
   @PostMapping(
     value = "/accounts/deposit",
