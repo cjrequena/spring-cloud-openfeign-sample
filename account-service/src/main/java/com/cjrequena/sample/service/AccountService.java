@@ -60,10 +60,14 @@ public class AccountService {
   }
 
   public void update(AccountDTO dto) throws AccountNotFoundServiceException, OptimisticConcurrencyServiceException {
-    AccountDTO _dto = this.retrieveById(dto.getId());
+    Optional<AccountEntity> optional = this.accountRepository.findWithLockingById(dto.getId());
+    if (optional.isEmpty()) {
+      throw new AccountNotFoundServiceException("The account :: " + dto.getId() + " :: was not Found");
+    }
+    AccountDTO _dto = this.accountMapper.toDTO(optional.get());
     if (_dto.getVersion().equals(dto.getVersion())) {
       AccountEntity entity = this.accountMapper.toEntity(dto);
-      this.accountRepository.update(entity);
+      this.accountRepository.save(entity);
       log.debug("Updated account with id {}", entity.getId());
     } else {
       log.trace(

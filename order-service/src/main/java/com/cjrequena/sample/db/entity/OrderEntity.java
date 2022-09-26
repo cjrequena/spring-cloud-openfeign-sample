@@ -34,6 +34,7 @@ public class OrderEntity {
   @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
   private LocalDate creationDate;
 
+  @Version
   @Column(name = "version")
   private Long version;
 }

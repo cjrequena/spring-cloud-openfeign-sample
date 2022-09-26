@@ -5,7 +5,6 @@ import com.cjrequena.sample.dto.OrderDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
 import com.cjrequena.sample.exception.service.AccountNotFoundServiceException;
-import com.cjrequena.sample.exception.service.FeignServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
 import com.cjrequena.sample.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -41,17 +40,12 @@ public class OrderApi {
     produces = {APPLICATION_JSON_VALUE}
   )
   public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder) throws BadRequestApiException {
-    try {
-      dto = orderService.create(dto);
-      URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
-      HttpHeaders headers = new HttpHeaders();
-      headers.set(CACHE_CONTROL, "no store, private, max-age=0");
-      headers.setLocation(resourcePath);
-      return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
-    } catch (FeignServiceException ex) {
-      log.error("{}", ex.getErrorDTO());
-      throw new BadRequestApiException(ex.getMessage());
-    }
+    this.orderService.create(dto);
+    URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
+    HttpHeaders headers = new HttpHeaders();
+    headers.set(CACHE_CONTROL, "no store, private, max-age=0");
+    headers.setLocation(resourcePath);
+    return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
   }
 
   @GetMapping(

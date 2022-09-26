@@ -1,6 +1,7 @@
 package com.cjrequena.sample.db.repository;
 
 import com.cjrequena.sample.db.entity.AccountEntity;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +32,9 @@ public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
   @Transactional(readOnly = true)
   List<AccountEntity> findAll();
 
+  @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+  Optional<AccountEntity> findWithLockingById(UUID id);
+
   @Modifying
   @Query(value = "INSERT INTO T_ACCOUNT "
     + " (ID, OWNER, BALANCE, VERSION) "
@@ -40,7 +45,7 @@ public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
   @Modifying
   @Query(value = "UPDATE T_ACCOUNT "
     + " SET OWNER = :#{#entity.owner}, "
-    + " BALANCE = :#{#entity.balance}, "
+    + " BALANCE = :#{#entity.balance} "
     + " VERSION= VERSION + 1"
     + " WHERE ID = :#{#entity.id} AND VERSION = :#{#entity.version}",
     nativeQuery = true)

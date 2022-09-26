@@ -2,7 +2,7 @@ package com.cjrequena.sample.web.api;
 
 import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.AccountDTO;
-import com.cjrequena.sample.exception.api.BadRequestApiException;
+import com.cjrequena.sample.exception.api.ConflictApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
 import com.cjrequena.sample.exception.service.AccountNotFoundServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
@@ -81,7 +81,7 @@ public class AccountApi {
     path = "/accounts/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> update(@PathVariable(value = "id") UUID id, @Valid @RequestBody AccountDTO dto, @RequestHeader("version") Long version) throws NotFoundApiException, BadRequestApiException {
+  public Mono<ResponseEntity<Void>> update(@PathVariable(value = "id") UUID id, @Valid @RequestBody AccountDTO dto, @RequestHeader("version") Long version) throws NotFoundApiException, ConflictApiException {
     try {
       dto.setId(id);
       dto.setVersion(version);
@@ -92,7 +92,7 @@ public class AccountApi {
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     } catch (OptimisticConcurrencyServiceException ex) {
-      throw new BadRequestApiException(ex.getMessage());
+      throw new ConflictApiException(ex.getMessage());
     }
   }
 
