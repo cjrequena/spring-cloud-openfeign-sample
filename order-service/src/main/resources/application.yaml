@@ -1,8 +1,7 @@
+spring.config.activate.on-profile: default
 server.servlet.context-path: / # Context path of the application.
 server.port: 9080 # Server HTTP port.
-spring.config.activate.on-profile: default
 spring.main.allow-bean-definition-overriding: true # Enable bean override
-
 
 # Postgres
 spring.datasource.postgres.type: com.zaxxer.hikari.HikariDataSource
@@ -33,9 +32,16 @@ spring.jpa.properties.hibernate.id.new_generator_mappings: false
 spring.jpa.properties.hibernate.search.autoregister_listeners: false
 spring.jpa.properties.hibernate.bytecode.use_reflection_optimizer: false
 
+# Flyway
 spring.flyway.enabled: false
 spring.flyway.locations: classpath:/db/migration
 
-
+# Feign -- https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/appendix.html
+feign.client.config.default:
+  connectTimeout: 5000
+  readTimeout: 5000
+feign.compression.request.enabled: false
+feign.compression.response.enabled: false
+feign.okhttp.enabled: true
 
 account-service.url: localhost:8080
