@@ -1,13 +1,12 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.common.EStatus;
 import com.cjrequena.sample.db.entity.OrderEntity;
 import com.cjrequena.sample.db.repository.OrderRepository;
 import com.cjrequena.sample.dto.AccountDTO;
 import com.cjrequena.sample.dto.OrderDTO;
-import com.cjrequena.sample.exception.service.FeignServiceException;
-import com.cjrequena.sample.exception.service.InsufficientBalanceServiceException;
-import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
-import com.cjrequena.sample.exception.service.OrderNotFoundServiceException;
+import com.cjrequena.sample.dto.WithdrawAccountDTO;
+import com.cjrequena.sample.exception.service.*;
 import com.cjrequena.sample.mapper.OrderMapper;
 import com.cjrequena.sample.service.feign.AccountFeignService;
 import jakarta.json.JsonMergePatch;
@@ -15,7 +14,9 @@ import jakarta.json.JsonPatch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Log4j2
 @Service
+@Transactional(propagation = Propagation.REQUIRED, rollbackFor = ServiceException.class)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderService {
 
@@ -35,8 +37,8 @@ public class OrderService {
   public void create(OrderDTO dto) throws FeignServiceException, InsufficientBalanceServiceException {
     AccountDTO accountDTO = this.accountFeignService.retrieve(dto.getAccountId());
     BigDecimal amount = accountDTO.getBalance().subtract(dto.getTotal());
-    if(amount.compareTo(BigDecimal.ZERO)==-1){
-     throw new InsufficientBalanceServiceException("Insufficient balance on account with id " + accountDTO.getId() );
+    if (amount.compareTo(BigDecimal.ZERO) == -1) {
+      throw new InsufficientBalanceServiceException("Insufficient balance on account with id " + accountDTO.getId());
     }
     OrderEntity entity = this.orderMapper.toEntity(dto);
     this.orderRepository.create(entity);
@@ -93,5 +95,27 @@ public class OrderService {
     this.orderRepository.deleteById(id);
   }
 
+  @Scheduled(
+    fixedDelayString = "3000",
+    initialDelayString = "3000")
+  public void processPendingOrders() {
+    log.debug("Processing pending orders ");
+    List<OrderEntity> orderEntities = this.orderRepository.retrieveOrdersByStatus(EStatus.PENDING.getValue());
+    for (OrderEntity orderEntity : orderEntities) {
+      log.debug("id {} account_id {} status {} creation_date {}", orderEntity.getId(), orderEntity.getAccountId(), orderEntity.getStatus(), orderEntity.getCreationDate());
+      WithdrawAccountDTO withdrawAccountDTO = new WithdrawAccountDTO();
+      withdrawAccountDTO.setAccountId(orderEntity.getAccountId());
+      withdrawAccountDTO.setAmount(orderEntity.getTotal());
+      try {
+        this.accountFeignService.withdraw(withdrawAccountDTO);
+        orderEntity.setStatus(EStatus.COMPLETED.getValue());
+      } catch (FeignServiceException ex) {
+        log.error(ex);
+        orderEntity.setStatus(EStatus.FAILED.getValue());
+        orderEntity.setDescription(ex.getMessage());
+      }
+      this.orderRepository.save(orderEntity);
+    }
+  }
 
 }

@@ -22,9 +22,10 @@ import static io.swagger.v3.oas.annotations.media.Schema.AccessMode.READ_ONLY;
 @JsonPropertyOrder(value = {
   "id",
   "account_id",
-  "status",
   "total",
   "creation_date",
+  "status",
+  "description",
   "version"
 })
 @Schema
@@ -38,10 +39,6 @@ public class OrderDTO {
   @JsonProperty(value = "account_id", required = true)
   private UUID accountId;
 
-  @JsonProperty(value = "status")
-  @Schema(accessMode = READ_ONLY)
-  private EStatus status = EStatus.PENDING; // Default value
-
   @NotNull(message = "total is a required field")
   @JsonProperty(value = "total", required = true)
   private BigDecimal total;
@@ -51,8 +48,17 @@ public class OrderDTO {
   @Schema(accessMode = READ_ONLY)
   private LocalDate creationDate;
 
+  @JsonProperty(value = "status")
+  @Schema(accessMode = READ_ONLY)
+  private EStatus status = EStatus.PENDING; // Default value
+
+  @JsonProperty(value = "description")
+  @Schema(accessMode = READ_ONLY)
+  private String description;
+
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @JsonProperty(value = "version")
   @Schema(accessMode = READ_ONLY)
   private Long version;
+
 }

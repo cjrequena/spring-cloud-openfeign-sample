@@ -24,15 +24,18 @@ public class OrderEntity {
   @Column(name = "account_id")
   UUID accountId;
 
-  @Column(name = "status")
-  String status;
-
   @Column(name = "total")
   BigDecimal total;
 
   @Column(name = "creation_date", nullable = false, updatable = false, insertable = false)
   @Convert(converter = Jsr310JpaConverters.LocalDateConverter.class)
   private LocalDate creationDate;
+
+  @Column(name = "status")
+  String status;
+
+  @Column(name = "description")
+  String description;
 
   @Version
   @Column(name = "version")

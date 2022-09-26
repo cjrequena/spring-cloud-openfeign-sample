@@ -34,6 +34,8 @@ public interface OrderRepository extends CrudRepository<OrderEntity, Integer> {
   @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
   Optional<OrderEntity> findWithLockingById(Integer id);
 
+  @Query(value = "SELECT * FROM T_ORDER WHERE STATUS = :status ORDER BY CREATION_DATE DESC", nativeQuery = true)
+  List<OrderEntity> retrieveOrdersByStatus(@Param("status") String status);
 
   @Modifying
   @Transactional
