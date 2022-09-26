@@ -4,10 +4,8 @@ import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.DepositAccountDTO;
 import com.cjrequena.sample.dto.WithdrawAccountDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
+import com.cjrequena.sample.exception.api.ConflictApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
-import com.cjrequena.sample.exception.controller.BadRequestControllerException;
-import com.cjrequena.sample.exception.controller.ConflictControllerException;
-import com.cjrequena.sample.exception.controller.NotFoundControllerException;
 import com.cjrequena.sample.exception.service.AccountNotFoundServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
 import com.cjrequena.sample.service.AccountService;
@@ -50,7 +48,7 @@ public class AccountController {
 
   @PostMapping(path = "/accounts/deposit", produces = {APPLICATION_JSON_VALUE})
   public Mono<ResponseEntity<Void>> deposit(@RequestBody DepositAccountDTO dto, ServerHttpRequest request)
-    throws NotFoundControllerException, BadRequestControllerException, ConflictControllerException, NotFoundApiException, BadRequestApiException {
+    throws NotFoundApiException, BadRequestApiException, ConflictApiException, NotFoundApiException, BadRequestApiException {
     try {
       this.accountService.deposit(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
@@ -65,7 +63,7 @@ public class AccountController {
 
   @PostMapping(path = "/accounts/withdraw", produces = {APPLICATION_JSON_VALUE})
   public Mono<ResponseEntity<Void>> withdraw(@RequestBody WithdrawAccountDTO dto, ServerHttpRequest request)
-    throws NotFoundControllerException, BadRequestControllerException, ConflictControllerException, NotFoundApiException, BadRequestApiException {
+    throws NotFoundApiException, BadRequestApiException, ConflictApiException, NotFoundApiException, BadRequestApiException {
     try {
       this.accountService.withdraw(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
