@@ -110,8 +110,7 @@ public class OrderService {
         this.accountFeignService.withdraw(withdrawAccountDTO);
         orderEntity.setStatus(EStatus.COMPLETED.getValue());
       } catch (FeignServiceException ex) {
-        log.error(ex);
-        orderEntity.setStatus(EStatus.FAILED.getValue());
+        orderEntity.setStatus(EStatus.REJECTED.getValue());
         orderEntity.setDescription(ex.getMessage());
       }
       this.orderRepository.save(orderEntity);
