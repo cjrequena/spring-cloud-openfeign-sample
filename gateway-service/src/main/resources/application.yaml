@@ -1,4 +1,17 @@
 spring.config.activate.on-profile: default
 server.servlet.context-path: / # Context path of the application.
-server.port: 1080 # Server HTTP port.
+server.port: 8000 # Server HTTP port.
+
 spring.main.allow-bean-definition-overriding: true # Enable bean override
+spring.cloud.gateway.discovery.locator.enabled: false
+spring.cloud.gateway.routes:
+  - id: account-service
+    #uri: lb://account-service
+    uri: http://localhost:8080
+    predicates:
+      - Path=/account-service/api/**
+  - id: order-service
+    #uri: lb://account-service
+    uri: http://localhost:9080
+    predicates:
+      - Path=/order-service/api/**
