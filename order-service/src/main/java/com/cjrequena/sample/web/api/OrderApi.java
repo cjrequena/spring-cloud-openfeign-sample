@@ -2,9 +2,11 @@ package com.cjrequena.sample.web.api;
 
 import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.OrderDTO;
+import com.cjrequena.sample.exception.ErrorDTO;
 import com.cjrequena.sample.exception.api.BadRequestApiException;
-import com.cjrequena.sample.exception.api.ConflictApiException;
+import com.cjrequena.sample.exception.api.FailedDependencyApiException;
 import com.cjrequena.sample.exception.api.NotFoundApiException;
+import com.cjrequena.sample.exception.api.PaymentRequiredApiException;
 import com.cjrequena.sample.exception.service.FeignServiceException;
 import com.cjrequena.sample.exception.service.InsufficientBalanceServiceException;
 import com.cjrequena.sample.exception.service.OptimisticConcurrencyServiceException;
@@ -43,7 +45,7 @@ public class OrderApi {
     produces = {APPLICATION_JSON_VALUE}
   )
   public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder)
-    throws BadRequestApiException, ConflictApiException {
+    throws BadRequestApiException, FailedDependencyApiException, PaymentRequiredApiException {
     try {
       this.orderService.create(dto);
       URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
@@ -51,8 +53,15 @@ public class OrderApi {
       headers.set(CACHE_CONTROL, "no store, private, max-age=0");
       headers.setLocation(resourcePath);
       return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
-    } catch (FeignServiceException | InsufficientBalanceServiceException ex) {
-      throw new ConflictApiException(ex.getMessage());
+    } catch (InsufficientBalanceServiceException ex) {
+      throw new PaymentRequiredApiException(ex.getMessage());
+    } catch (FeignServiceException ex){
+      ErrorDTO errorDTO = ex.getErrorDTO();
+      log.error("{}", errorDTO);
+      if(errorDTO.getStatus()==HttpStatus.FAILED_DEPENDENCY.value()){
+        throw new FailedDependencyApiException(ex.getMessage());
+      }
+      throw new BadRequestApiException(ex.getMessage());
     }
   }
 

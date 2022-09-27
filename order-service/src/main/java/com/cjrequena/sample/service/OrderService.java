@@ -8,7 +8,6 @@ import com.cjrequena.sample.dto.OrderDTO;
 import com.cjrequena.sample.dto.WithdrawAccountDTO;
 import com.cjrequena.sample.exception.service.*;
 import com.cjrequena.sample.mapper.OrderMapper;
-import com.cjrequena.sample.service.feign.AccountFeignService;
 import jakarta.json.JsonMergePatch;
 import jakarta.json.JsonPatch;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +31,10 @@ public class OrderService {
 
   private final OrderMapper orderMapper;
   private final OrderRepository orderRepository;
-  private final AccountFeignService accountFeignService;
+  private final AccountService accountService;
 
   public void create(OrderDTO dto) throws FeignServiceException, InsufficientBalanceServiceException {
-    AccountDTO accountDTO = this.accountFeignService.retrieve(dto.getAccountId());
+    AccountDTO accountDTO = this.accountService.retrieve(dto.getAccountId());
     BigDecimal amount = accountDTO.getBalance().subtract(dto.getTotal());
     if (amount.compareTo(BigDecimal.ZERO) == -1) {
       throw new InsufficientBalanceServiceException("Insufficient balance on account with id " + accountDTO.getId());
@@ -107,7 +106,7 @@ public class OrderService {
       withdrawAccountDTO.setAccountId(orderEntity.getAccountId());
       withdrawAccountDTO.setAmount(orderEntity.getTotal());
       try {
-        this.accountFeignService.withdraw(withdrawAccountDTO);
+        this.accountService.withdraw(withdrawAccountDTO);
         orderEntity.setStatus(EStatus.COMPLETED.getValue());
       } catch (FeignServiceException ex) {
         orderEntity.setStatus(EStatus.REJECTED.getValue());

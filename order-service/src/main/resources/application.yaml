@@ -44,4 +44,48 @@ feign.compression.request.enabled: false
 feign.compression.response.enabled: false
 feign.okhttp.enabled: true
 
+# https://resilience4j.readme.io/docs/circuitbreaker
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      registerHealthIndicator: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 100
+      slowCallDurationThreshold: 60000ms
+      permittedNumberOfCallsInHalfOpenState: 10
+      maxWaitDurationInHalfOpenState: 0
+      slidingWindowType: "COUNT_BASED"
+      slidingWindowSize: 100
+      minimumNumberOfCalls: 100
+      waitDurationInOpenState: 6000ms
+      automaticTransitionFromOpenToHalfOpenEnabled: false
+      max-wait-duration-in-half-open-state: 1ms
+      recordExceptions:
+      ignoreExceptions:
+  instances:
+    account-service:
+      baseConfig: default
+# https://resilience4j.readme.io/docs/retry
+resilience4j.retry:
+  configs:
+    default:
+      maxRetryAttempts: 3
+      waitDuration: 100
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.util.concurrent.TimeoutException
+        - java.io.IOException
+  instances:
+    account-service:
+      baseConfig: default
+# https://resilience4j.readme.io/docs/bulkhead
+resilience4j.bulkhead:
+  configs:
+    default:
+      maxWaitDuration: 10ms
+      maxConcurrentCalls: 10
+  instances:
+    account-service:
+      baseConfig: default
+
 account-service.url: localhost:8080

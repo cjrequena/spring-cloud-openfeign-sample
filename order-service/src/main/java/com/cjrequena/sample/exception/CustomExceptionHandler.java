@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ServerWebInputException;
 
-import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -38,32 +36,6 @@ public class CustomExceptionHandler {
     errorDTO.setErrorCode(ex.getClass().getSimpleName());
     errorDTO.setMessage(ex.getMessage());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDTO);
-  }
-
-  @ExceptionHandler({ConstraintViolationException.class})
-  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public ResponseEntity<Object> handleConstrainViolationException(ConstraintViolationException ex) {
-    log.debug(EXCEPTION_LOG, ex.getMessage(), ex);
-    ErrorDTO errorDTO = new ErrorDTO();
-    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
-    errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
-    errorDTO.setErrorCode(ex.getClass().getSimpleName());
-    errorDTO.setMessage(ex.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
-  }
-
-  @ExceptionHandler({ServerWebInputException.class})
-  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public ResponseEntity<Object> handleServerWebInputException(ServerWebInputException ex) {
-    log.debug(EXCEPTION_LOG, ex.getMessage(), ex);
-    ErrorDTO errorDTO = new ErrorDTO();
-    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
-    errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
-    errorDTO.setErrorCode(ex.getClass().getSimpleName());
-    errorDTO.setMessage(ex.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
   }
 
   @ExceptionHandler({ServiceException.class})

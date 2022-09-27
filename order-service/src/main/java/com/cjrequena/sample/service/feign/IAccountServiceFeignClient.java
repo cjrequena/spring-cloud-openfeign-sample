@@ -5,7 +5,6 @@ import com.cjrequena.sample.dto.AccountDTO;
 import com.cjrequena.sample.dto.DepositAccountDTO;
 import com.cjrequena.sample.dto.WithdrawAccountDTO;
 import com.cjrequena.sample.exception.service.FeignServiceException;
-import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +26,7 @@ import java.util.UUID;
  * @version 1.0
  */
 @FeignClient(name = "account-service", url = "${account-service.url}", contextId = "account-service", path = "/account-service/api")
-@Headers("Accept-Version: " + Constants.VND_SAMPLE_SERVICE_V1)
-public interface AccountFeignService {
+public interface IAccountServiceFeignClient {
 
   @GetMapping(
     value = "/accounts/{id}",
