@@ -32,7 +32,8 @@ public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
   @Transactional(readOnly = true)
   List<AccountEntity> findAll();
 
-  @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+  //@Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+  @Lock(LockModeType.OPTIMISTIC)
   Optional<AccountEntity> findWithLockingById(UUID id);
 
   @Modifying
