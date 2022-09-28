@@ -1,5 +1,6 @@
 package com.cjrequena.sample.configuration;
 
+import com.cjrequena.sample.common.Constants;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,7 +59,7 @@ public class JacksonConfiguration {
         SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
         MapperFeature.AUTO_DETECT_IS_GETTERS)
       .build()
-      .setDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
+      .setDateFormat(new SimpleDateFormat(Constants.DATE_TIME_FORMAT))
       .registerModule(new JavaTimeModule());
   }
 }

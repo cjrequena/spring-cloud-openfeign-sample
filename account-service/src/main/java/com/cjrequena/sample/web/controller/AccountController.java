@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -48,13 +47,13 @@ public class AccountController {
   private final AccountService accountService;
 
   @PostMapping(path = "/accounts/deposit", produces = {APPLICATION_JSON_VALUE})
-  public Mono<ResponseEntity<Void>> deposit(@RequestBody DepositAccountDTO dto, HttpServletRequest request)
+  public ResponseEntity<Void> deposit(@RequestBody DepositAccountDTO dto, HttpServletRequest request)
     throws NotFoundApiException, BadRequestApiException, ConflictApiException, NotFoundApiException, BadRequestApiException {
     try {
       this.accountService.deposit(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-      return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
+      return new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT);
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     } catch (OptimisticConcurrencyServiceException ex) {
@@ -63,13 +62,13 @@ public class AccountController {
   }
 
   @PostMapping(path = "/accounts/withdraw", produces = {APPLICATION_JSON_VALUE})
-  public Mono<ResponseEntity<Void>> withdraw(@RequestBody WithdrawAccountDTO dto, HttpServletRequest request)
+  public ResponseEntity<Void> withdraw(@RequestBody WithdrawAccountDTO dto, HttpServletRequest request)
     throws NotFoundApiException, BadRequestApiException, ConflictApiException, NotFoundApiException, BadRequestApiException {
     try {
       this.accountService.withdraw(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-      return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
+      return new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT);
     } catch (AccountNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     } catch (OptimisticConcurrencyServiceException ex) {

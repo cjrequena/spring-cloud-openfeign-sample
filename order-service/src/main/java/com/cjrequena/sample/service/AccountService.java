@@ -1,5 +1,6 @@
 package com.cjrequena.sample.service;
 
+import com.cjrequena.sample.common.Constants;
 import com.cjrequena.sample.dto.AccountDTO;
 import com.cjrequena.sample.dto.DepositAccountDTO;
 import com.cjrequena.sample.dto.WithdrawAccountDTO;
@@ -41,7 +42,7 @@ public class AccountService implements IAccountServiceFeignClient {
       throw ex;
     } else {
       ErrorDTO errorDTO = new ErrorDTO();
-      errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+      errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)));
       errorDTO.setErrorCode(ex.getClass().getSimpleName());
       errorDTO.setMessage(ex.getMessage());
       if (ex.getCause() != null && ex.getCause().getMessage().contains("Connection refused")) {

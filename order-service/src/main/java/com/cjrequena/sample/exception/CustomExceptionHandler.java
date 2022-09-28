@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.cjrequena.sample.common.Constants.DATE_TIME_FORMAT;
+
 /**
  *
  * <p></p>
@@ -23,7 +25,6 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class CustomExceptionHandler {
 
-  public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
   private static final String EXCEPTION_LOG = "Exception {}";
 
   @ExceptionHandler({Exception.class})
