@@ -67,13 +67,13 @@ public class AccountService implements IAccountServiceFeignClient {
   }
 
   @Override
+  @CircuitBreaker(name = "default", fallbackMethod = "withdrawFallbackMethod")
+  @Bulkhead(name = "default")
+  @Retry(name = "default")
   public ResponseEntity<Void> withdraw(WithdrawAccountDTO dto) throws FeignServiceException {
     return this.accountServiceFeignClient.withdraw(dto);
   }
 
-  @CircuitBreaker(name = "default", fallbackMethod = "withdrawFallbackMethod")
-  @Bulkhead(name = "default")
-  @Retry(name = "default")
   public ResponseEntity<Void> withdrawFallbackMethod(WithdrawAccountDTO dto, Throwable ex) throws FeignServiceException {
     log.debug("withdrawFallbackMethod");
     throw new FeignServiceException(ex.getMessage(), ex);

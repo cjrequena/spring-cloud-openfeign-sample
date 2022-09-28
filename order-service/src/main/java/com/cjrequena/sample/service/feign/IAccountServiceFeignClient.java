@@ -47,6 +47,6 @@ public interface IAccountServiceFeignClient {
     consumes = {MediaType.APPLICATION_JSON_VALUE},
     headers = {"Accept-Version=" + Constants.VND_SAMPLE_SERVICE_V1}
   )
-  ResponseEntity<Void> withdraw(WithdrawAccountDTO dto) throws FeignServiceException;
+  ResponseEntity<Void> withdraw(@RequestBody WithdrawAccountDTO dto) throws FeignServiceException;
 
 }
