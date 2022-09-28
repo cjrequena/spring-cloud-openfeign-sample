@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -26,6 +25,7 @@ import java.util.UUID;
  * @version 1.0
  */
 @FeignClient(name = "account-service", url = "${account-service.url}", contextId = "account-service", path = "/account-service/api")
+//@LoadBalancerClient(name = "account-service", configuration = LoadBalancerConfiguration.class)
 public interface IAccountServiceFeignClient {
 
   @GetMapping(
@@ -47,6 +47,6 @@ public interface IAccountServiceFeignClient {
     consumes = {MediaType.APPLICATION_JSON_VALUE},
     headers = {"Accept-Version=" + Constants.VND_SAMPLE_SERVICE_V1}
   )
-  Mono<ResponseEntity<Void>> withdraw(WithdrawAccountDTO dto) throws FeignServiceException;
+  ResponseEntity<Void> withdraw(WithdrawAccountDTO dto) throws FeignServiceException;
 
 }

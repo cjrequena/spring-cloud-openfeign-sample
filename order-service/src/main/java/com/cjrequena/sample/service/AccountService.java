@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -37,7 +36,7 @@ public class AccountService implements IAccountServiceFeignClient {
   }
 
   public AccountDTO retrieveFallbackMethod(UUID id, Throwable ex) throws Throwable {
-    log.debug("retrieveFallbackMethod");
+    log.debug("retrieveFallbackMethod", ex.getCause());
     if (ex instanceof FeignServiceException) {
       throw ex;
     } else {
@@ -45,8 +44,9 @@ public class AccountService implements IAccountServiceFeignClient {
       errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
       errorDTO.setErrorCode(ex.getClass().getSimpleName());
       errorDTO.setMessage(ex.getMessage());
-      if (ex.getCause().getMessage().contains("Connection refused")) {
-        errorDTO.setStatus(HttpStatus.FAILED_DEPENDENCY.value());;
+      if (ex.getCause() != null && ex.getCause().getMessage().contains("Connection refused")) {
+        errorDTO.setStatus(HttpStatus.FAILED_DEPENDENCY.value());
+        ;
       }
       throw new FeignServiceException(errorDTO);
     }
@@ -66,7 +66,7 @@ public class AccountService implements IAccountServiceFeignClient {
   }
 
   @Override
-  public Mono<ResponseEntity<Void>> withdraw(WithdrawAccountDTO dto) throws FeignServiceException {
+  public ResponseEntity<Void> withdraw(WithdrawAccountDTO dto) throws FeignServiceException {
     return this.accountServiceFeignClient.withdraw(dto);
   }
 
