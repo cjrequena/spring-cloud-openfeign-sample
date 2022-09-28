@@ -24,7 +24,8 @@ import java.util.UUID;
  * @author cjrequena
  * @version 1.0
  */
-@FeignClient(name = "account-service", url = "${account-service.url}", contextId = "account-service", path = "/account-service/api")
+//@FeignClient(name = "account-service", url = "${account-service.url}", contextId = "account-service", path = "/account-service/api")
+@FeignClient(name = "account-service", contextId = "account-service", path = "/account-service/api")
 //@LoadBalancerClient(name = "account-service", configuration = LoadBalancerConfiguration.class)
 public interface IAccountServiceFeignClient {
 

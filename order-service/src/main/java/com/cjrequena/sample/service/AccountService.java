@@ -7,6 +7,7 @@ import com.cjrequena.sample.dto.WithdrawAccountDTO;
 import com.cjrequena.sample.exception.ErrorDTO;
 import com.cjrequena.sample.exception.service.FeignServiceException;
 import com.cjrequena.sample.service.feign.IAccountServiceFeignClient;
+import feign.FeignException;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -38,19 +39,24 @@ public class AccountService implements IAccountServiceFeignClient {
 
   public AccountDTO retrieveFallbackMethod(UUID id, Throwable ex) throws Throwable {
     log.debug("retrieveFallbackMethod", ex.getCause());
+    ErrorDTO errorDTO = new ErrorDTO();
+    errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)));
+    errorDTO.setErrorCode(ex.getClass().getSimpleName());
+    errorDTO.setMessage(ex.getMessage());
+
     if (ex instanceof FeignServiceException) {
       throw ex;
-    } else {
-      ErrorDTO errorDTO = new ErrorDTO();
-      errorDTO.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)));
-      errorDTO.setErrorCode(ex.getClass().getSimpleName());
-      errorDTO.setMessage(ex.getMessage());
-      if (ex.getCause() != null && ex.getCause().getMessage().contains("Connection refused")) {
-        errorDTO.setStatus(HttpStatus.FAILED_DEPENDENCY.value());
-        ;
-      }
-      throw new FeignServiceException(errorDTO);
     }
+
+    if (ex instanceof FeignException) {
+      errorDTO.setStatus(HttpStatus.FAILED_DEPENDENCY.value());
+    }
+
+    if (ex.getCause() != null && ex.getCause().getMessage().contains("Connection refused")) {
+      errorDTO.setStatus(HttpStatus.FAILED_DEPENDENCY.value());
+    }
+
+    throw new FeignServiceException(errorDTO);
   }
 
   @Override
