@@ -15,12 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static com.cjrequena.sample.web.controller.AccountController.ACCEPT_VERSION;
 import static com.cjrequena.sample.web.controller.AccountController.ENDPOINT;
@@ -47,7 +48,7 @@ public class AccountController {
   private final AccountService accountService;
 
   @PostMapping(path = "/accounts/deposit", produces = {APPLICATION_JSON_VALUE})
-  public Mono<ResponseEntity<Void>> deposit(@RequestBody DepositAccountDTO dto, ServerHttpRequest request)
+  public Mono<ResponseEntity<Void>> deposit(@RequestBody DepositAccountDTO dto, HttpServletRequest request)
     throws NotFoundApiException, BadRequestApiException, ConflictApiException, NotFoundApiException, BadRequestApiException {
     try {
       this.accountService.deposit(dto);
@@ -62,7 +63,7 @@ public class AccountController {
   }
 
   @PostMapping(path = "/accounts/withdraw", produces = {APPLICATION_JSON_VALUE})
-  public Mono<ResponseEntity<Void>> withdraw(@RequestBody WithdrawAccountDTO dto, ServerHttpRequest request)
+  public Mono<ResponseEntity<Void>> withdraw(@RequestBody WithdrawAccountDTO dto, HttpServletRequest request)
     throws NotFoundApiException, BadRequestApiException, ConflictApiException, NotFoundApiException, BadRequestApiException {
     try {
       this.accountService.withdraw(dto);

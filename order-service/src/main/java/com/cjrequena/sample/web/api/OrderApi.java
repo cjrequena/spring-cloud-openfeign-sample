@@ -18,11 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -44,15 +43,15 @@ public class OrderApi {
     path = "/orders",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> create(@Valid @RequestBody OrderDTO dto, ServerHttpRequest request, UriComponentsBuilder ucBuilder)
+  public ResponseEntity<Void> create(@Valid @RequestBody OrderDTO dto, HttpServletRequest request, UriComponentsBuilder ucBuilder)
     throws BadRequestApiException, FailedDependencyApiException, PaymentRequiredApiException {
     try {
       this.orderService.create(dto);
-      URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
+      URI resourcePath = ucBuilder.path(new StringBuilder().append(request.getServletPath()).append("/{id}").toString()).buildAndExpand(dto.getId()).toUri();
       HttpHeaders headers = new HttpHeaders();
       headers.set(CACHE_CONTROL, "no store, private, max-age=0");
       headers.setLocation(resourcePath);
-      return Mono.just(ResponseEntity.created(resourcePath).headers(headers).build());
+      return ResponseEntity.created(resourcePath).headers(headers).build();
     } catch (InsufficientBalanceServiceException ex) {
       throw new PaymentRequiredApiException(ex.getMessage());
     } catch (FeignServiceException ex){
@@ -69,12 +68,12 @@ public class OrderApi {
     path = "/orders/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<OrderDTO>> retrieveById(@PathVariable(value = "id") Integer id) throws NotFoundApiException {
+  public ResponseEntity<OrderDTO> retrieveById(@PathVariable(value = "id") Integer id) throws NotFoundApiException {
     try {
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
       OrderDTO dto = this.orderService.retrieveById(id);
-      return Mono.just(new ResponseEntity<>(dto, responseHeaders, HttpStatus.OK));
+      return new ResponseEntity<>(dto, responseHeaders, HttpStatus.OK);
     } catch (OrderNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     }
@@ -84,25 +83,25 @@ public class OrderApi {
     path = "/orders",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<List<OrderDTO>>> retrieve() {
+  public ResponseEntity<List<OrderDTO>> retrieve() {
 
     List<OrderDTO> dtoList = this.orderService.retrieve();
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-    return Mono.just(new ResponseEntity<>(dtoList, responseHeaders, HttpStatus.OK));
+    return new ResponseEntity<>(dtoList, responseHeaders, HttpStatus.OK);
   }
 
   @PutMapping(
     path = "/orders/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody OrderDTO dto) throws NotFoundApiException, BadRequestApiException {
+  public ResponseEntity<Void> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody OrderDTO dto) throws NotFoundApiException, BadRequestApiException {
     try {
       dto.setId(id);
       this.orderService.update(dto);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
-      return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
+      return new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT);
     } catch (OrderNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     } catch (OptimisticConcurrencyServiceException ex) {
@@ -114,12 +113,12 @@ public class OrderApi {
     path = "/orders/{id}",
     produces = {APPLICATION_JSON_VALUE}
   )
-  public Mono<ResponseEntity<Void>> delete(@PathVariable(value = "id") Integer id) throws NotFoundApiException {
+  public ResponseEntity<Void> delete(@PathVariable(value = "id") Integer id) throws NotFoundApiException {
     try {
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.set(CACHE_CONTROL, "no store, private, max-age=0");
       this.orderService.delete(id);
-      return Mono.just(new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT));
+      return new ResponseEntity<>(responseHeaders, HttpStatus.NO_CONTENT);
     } catch (OrderNotFoundServiceException ex) {
       throw new NotFoundApiException(ex.getMessage());
     }

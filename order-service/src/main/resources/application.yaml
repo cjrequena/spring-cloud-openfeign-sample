@@ -9,7 +9,7 @@ spring.main.allow-bean-definition-overriding: true # Enable bean override
 spring.cloud.consul:
   host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
   port: ${SPRING_CLOUD_CONSUL_PORT:8500}
-  enabled: ${SPRING_CLOUD_CONSUL_ENABLED:false}
+  enabled: ${SPRING_CLOUD_CONSUL_ENABLED:true}
   discovery:
     # Service name
     serviceName: ${spring.application.name}
