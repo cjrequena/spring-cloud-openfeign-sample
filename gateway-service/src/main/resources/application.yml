@@ -1,10 +1,9 @@
 server.servlet.context-path: / # Context path of the application.
-server.port: 8000
-
-spring.application.name: gateway-service
-spring.application.profiles.active: default
-spring.config.activate.on-profile: default
-spring.main.allow-bean-definition-overriding: true
+server.port: ${SERVER_PORT:8000} # Server HTTP port.
+spring.application.name: '@project.artifactId@'
+spring.application.version: '@project.version@'
+spring.profiles.active: ${SPRING_PROFILES_ACTIVE:local}
+spring.main.allow-bean-definition-overriding: true # Enable bean override
 
 spring.cloud.consul:
   host: ${SPRING_CLOUD_CONSUL_HOST:localhost}
@@ -75,7 +74,9 @@ management.info.env.enabled: true # Whether to enable environment info.
 management.info.git.enabled: true # Whether to enable git info.
 management.info.git.mode: full # Mode to use to expose git information.
 
-#
+---
+spring.config.activate.on-profile: local
+
 spring.cloud.gateway.discovery.locator.enabled: false
 spring.cloud.gateway.routes:
   - id: account-service

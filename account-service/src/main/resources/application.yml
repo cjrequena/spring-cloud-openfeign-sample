@@ -1,9 +1,8 @@
 server.servlet.context-path: / # Context path of the application.
-server.port: 9080 # Server HTTP port.
-
-spring.application.name: order-service
-spring.application.profiles.active: default
-spring.config.activate.on-profile: default
+server.port: ${SERVER_PORT:8080} # Server HTTP port.
+spring.application.name: '@project.artifactId@'
+spring.application.version: '@project.version@'
+spring.profiles.active: ${SPRING_PROFILES_ACTIVE:local}
 spring.main.allow-bean-definition-overriding: true # Enable bean override
 
 spring.cloud.consul:
@@ -44,7 +43,7 @@ spring.cloud.consul:
 
 spring.cloud.config:
   # Flag to say that remote configuration is enabled. (default false).
-  enabled: ${SPRING_CLOUD_CONFIG_ENABLED:true}
+  enabled: ${SPRING_CLOUD_CONFIG_ENABLED:false}
   # Flag to indicate that failure to connect to the server is fatal (default false).
   failFast: ${SPRING_CLOUD_CONFIG_FAIL_FAST:true}
   discovery:
@@ -75,6 +74,9 @@ management.info.env.enabled: true # Whether to enable environment info.
 management.info.git.enabled: true # Whether to enable git info.
 management.info.git.mode: full # Mode to use to expose git information.
 
+---
+spring.config.activate.on-profile: local
+
 # Postgres
 spring.datasource.postgres.type: com.zaxxer.hikari.HikariDataSource
 spring.datasource.postgres.jdbcUrl: jdbc:postgresql://${POSTGRES_HOST:localhost}:15432/postgres
@@ -104,60 +106,5 @@ spring.jpa.properties.hibernate.id.new_generator_mappings: false
 spring.jpa.properties.hibernate.search.autoregister_listeners: false
 spring.jpa.properties.hibernate.bytecode.use_reflection_optimizer: false
 
-# Flyway
 spring.flyway.enabled: false
 spring.flyway.locations: classpath:/db/migration
-
-# Feign -- https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/appendix.html
-feign.client.config.default:
-  connectTimeout: 5000
-  readTimeout: 5000
-feign.compression.request.enabled: false
-feign.compression.response.enabled: false
-feign.okhttp.enabled: true
-
-# https://resilience4j.readme.io/docs/circuitbreaker
-resilience4j.circuitbreaker:
-  configs:
-    default:
-      registerHealthIndicator: true
-      failureRateThreshold: 50
-      slowCallRateThreshold: 100
-      slowCallDurationThreshold: 60000ms
-      permittedNumberOfCallsInHalfOpenState: 10
-      maxWaitDurationInHalfOpenState: 0
-      slidingWindowType: "COUNT_BASED"
-      slidingWindowSize: 100
-      minimumNumberOfCalls: 100
-      waitDurationInOpenState: 6000ms
-      automaticTransitionFromOpenToHalfOpenEnabled: false
-      max-wait-duration-in-half-open-state: 1ms
-      recordExceptions:
-      ignoreExceptions:
-  instances:
-    account-service:
-      baseConfig: default
-# https://resilience4j.readme.io/docs/retry
-resilience4j.retry:
-  configs:
-    default:
-      maxRetryAttempts: 3
-      waitDuration: 100
-      retryExceptions:
-        - org.springframework.web.client.HttpServerErrorException
-        - java.util.concurrent.TimeoutException
-        - java.io.IOException
-  instances:
-    account-service:
-      baseConfig: default
-# https://resilience4j.readme.io/docs/bulkhead
-resilience4j.bulkhead:
-  configs:
-    default:
-      maxWaitDuration: 10ms
-      maxConcurrentCalls: 10
-  instances:
-    account-service:
-      baseConfig: default
-
-account-service.url: localhost:8080
