@@ -44,7 +44,7 @@ spring.cloud.consul:
 
 spring.cloud.config:
   # Flag to say that remote configuration is enabled. (default false).
-  enabled: ${SPRING_CLOUD_CONFIG_ENABLED:false}
+  enabled: ${SPRING_CLOUD_CONFIG_ENABLED:true}
   # Flag to indicate that failure to connect to the server is fatal (default false).
   failFast: ${SPRING_CLOUD_CONFIG_FAIL_FAST:true}
   discovery:
