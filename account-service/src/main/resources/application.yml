@@ -41,16 +41,12 @@ spring.cloud.consul:
     # Port to register the service under (defaults to listening port)
     #port: ${SPRING_CLOUD_CONSUL_DISCOVERY_PORT}
 
+spring.config.import: "optional:configserver:${CONFIG_SERVER:http://localhost:8888}/"
 spring.cloud.config:
   # Flag to say that remote configuration is enabled. (default false).
-  enabled: ${SPRING_CLOUD_CONFIG_ENABLED:false}
+  enabled: ${SPRING_CLOUD_CONFIG_ENABLED:true}
   # Flag to indicate that failure to connect to the server is fatal (default false).
   failFast: ${SPRING_CLOUD_CONFIG_FAIL_FAST:true}
-  discovery:
-    # Flag to indicate that config server discovery is enabled (config server URL will be looked up via discovery). (default false).
-    enabled: ${SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED:true}
-    # Service id to locate config server.
-    serviceId: ${SPRING_CLOUD_CONFIG_DISCOVERY_SERVICE_ID:config-server}
 
 # ----------------------------------------
 # ACTUATOR PROPERTIES
