@@ -3,33 +3,33 @@ version: '3.8'
 services:
   postgres:
     image: "postgres"
-    container_name: "postgres-spring-cloud-openfeign-sample"
-    hostname: "postgres-001"
+    container_name: "postgres"
+    hostname: "postgres"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       PGDATA: "/data/postgres"
     ports:
-      - "15432:5432"
+      - "5432:5432"
     volumes:
       - type: volume
-        source: "postgres-001"
+        source: "postgres"
         target: "/data/postgres"
-      - $PWD/V1.0__account_db.sql:/docker-entrypoint-initdb.d/1-account_db.sql
-      - $PWD/V1.0__order_db.sql:/docker-entrypoint-initdb.d/1-order_db.sql
+      #- $PWD/V1.0__account_db.sql:/docker-entrypoint-initdb.d/1-account_db.sql
+      #- $PWD/V1.0__order_db.sql:/docker-entrypoint-initdb.d/1-order_db.sql
     networks:
-      - "network-spring-cloud-openfeign-sample.local"
+      - "network.local"
     restart: unless-stopped
 #---------------------------------------------------------------------------------------------------------------------
 networks:
-  network-spring-cloud-openfeign-sample.local:
-    name: "network-spring-cloud-openfeign-sample.local"
+  network.local:
+    name: "network.local"
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 172.28.0.0/16
+        - subnet: 172.21.0.0/16
 #---------------------------------------------------------------------------------------------------------------------
 volumes:
-  postgres-001:
-    name: "postgres-001"
+  postgres:
+    name: "postgres"

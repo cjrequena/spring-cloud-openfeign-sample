@@ -37,14 +37,14 @@ public interface AccountRepository extends CrudRepository<AccountEntity, UUID> {
   Optional<AccountEntity> findWithLockingById(UUID id);
 
   @Modifying
-  @Query(value = "INSERT INTO T_ACCOUNT "
+  @Query(value = "INSERT INTO S_ACCOUNT.T_ACCOUNT "
     + " (ID, OWNER, BALANCE, VERSION) "
     + " VALUES (:#{#entity.id}, :#{#entity.owner}, :#{#entity.balance}, 1)"
     , nativeQuery = true)
   void create(@Param("entity") AccountEntity entity);
 
   @Modifying
-  @Query(value = "UPDATE T_ACCOUNT "
+  @Query(value = "UPDATE S_ACCOUNT.T_ACCOUNT "
     + " SET OWNER = :#{#entity.owner}, "
     + " BALANCE = :#{#entity.balance} "
     + " VERSION= VERSION + 1"
